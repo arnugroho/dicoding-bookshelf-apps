@@ -71,9 +71,17 @@ function incompleteBook(bookObject) {
     btnSelesai.innerHTML = 'Selesai dibaca'
     btnSelesai.classList.add('green');
 
+    btnSelesai.addEventListener('click', function () {
+        pindahBuku(bookObject.id);
+    });
+
     const btnHapus = document.createElement('button');
     btnHapus.innerHTML = 'Hapus buku'
     btnHapus.classList.add('read');
+
+    btnHapus.addEventListener('click', function () {
+        removeBook(bookObject.id);
+    });
 
     const divAction = document.createElement('div');
     divAction.classList.add('action');
@@ -102,9 +110,17 @@ function completeBook(bookObject) {
     btnSelesai.innerHTML = 'Belum selesai di Baca'
     btnSelesai.classList.add('green');
 
+    btnSelesai.addEventListener('click', function () {
+        pindahBuku(bookObject.id);
+    });
+
     const btnHapus = document.createElement('button');
     btnHapus.innerHTML = 'Hapus buku'
     btnHapus.classList.add('read');
+
+    btnHapus.addEventListener('click', function () {
+        removeBook(bookObject.id);
+    });
 
     const divAction = document.createElement('div');
     divAction.classList.add('action');
@@ -117,4 +133,31 @@ function completeBook(bookObject) {
     articleBook.setAttribute('id', `book-${bookObject.id}`);
 
     return articleBook;
+}
+
+function pindahBuku (bookId) {
+    const bookTarget = findBook(bookId);
+
+    if (bookTarget == null) return;
+
+    bookTarget.isComplete = !bookTarget.isComplete;
+    document.dispatchEvent(new Event(RENDER_EVENT));
+}
+
+function findBook(bookId) {
+    for (const bookItem of books) {
+        if (bookItem.id === bookId) {
+            return bookItem;
+        }
+    }
+    return null;
+}
+
+function removeBook(bookId) {
+    const bookTarget = findBook(bookId);
+
+    if (bookTarget == null) return;
+
+    books.splice(bookTarget, 1);
+    document.dispatchEvent(new Event(RENDER_EVENT));
 }
