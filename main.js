@@ -1,16 +1,36 @@
-const books = [];
+// const books = [];
 const RENDER_EVENT = 'render-book';
+let queryCari = ''
+const localStorageBook = 'book-storage';
+
 
 document.addEventListener('DOMContentLoaded', function () {
-    const submitForm = document.getElementById('inputBook');
-    submitForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-        addBook();
-    });
+    if (typeof (Storage) !== 'undefined') {
+        if (localStorage.getItem(localStorageBook) === null) {
+            localStorage.setItem(localStorageBook, JSON.stringify([]));
+        }
+        document.dispatchEvent(new Event(RENDER_EVENT));
+
+        const submitForm = document.getElementById('inputBook');
+        submitForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            addBook();
+        });
+
+        const searchSubmit = document.getElementById('searchSubmit');
+        searchSubmit.addEventListener('submit', function (event) {
+            event.preventDefault();
+            queryCari = document.getElementById('searchBookTitle').value
+            document.dispatchEvent(new Event(RENDER_EVENT));
+        });
+    } else {
+        alert('Browser yang Anda gunakan tidak mendukung Web Storage');
+    }
 });
 
 
 function addBook() {
+    const books = JSON.parse(localStorage.getItem(localStorageBook))
     const inputBookTitle = document.getElementById('inputBookTitle').value;
     const inputBookAuthor = document.getElementById('inputBookAuthor').value;
     const inputBookYear = document.getElementById('inputBookYear').value;
@@ -19,6 +39,8 @@ function addBook() {
     const generatedID = generateId();
     const bookObject = generateBookObject(generatedID, inputBookTitle, inputBookAuthor, inputBookYear, inputBookIsComplete);
     books.push(bookObject);
+
+    localStorage.setItem(localStorageBook, JSON.stringify(books));
 
     document.dispatchEvent(new Event(RENDER_EVENT));
 }
@@ -39,17 +61,17 @@ function generateBookObject(id, title, author, year, isComplete) {
 }
 
 document.addEventListener(RENDER_EVENT, function () {
-    console.log(books);
+    const books = JSON.parse(localStorage.getItem(localStorageBook))
     const uncompletedTODOList = document.getElementById('incompleteBookshelfList');
     const completedTODOList = document.getElementById('completeBookshelfList');
     uncompletedTODOList.innerHTML = '';
     completedTODOList.innerHTML = '';
 
     for (const bookItem of books) {
-        if(bookItem.isComplete){
+        if (bookItem.isComplete && bookItem.title.includes(queryCari)) {
             const bookElement = completeBook(bookItem);
             completedTODOList.append(bookElement);
-        } else {
+        } else if ((!bookItem.isComplete) && bookItem.title.includes(queryCari)) {
             const bookElement = incompleteBook(bookItem);
             uncompletedTODOList.append(bookElement);
         }
@@ -135,16 +157,18 @@ function completeBook(bookObject) {
     return articleBook;
 }
 
-function pindahBuku (bookId) {
+function pindahBuku(bookId) {
     const bookTarget = findBook(bookId);
 
     if (bookTarget == null) return;
 
     bookTarget.isComplete = !bookTarget.isComplete;
+    updateDataBook(bookTarget)
     document.dispatchEvent(new Event(RENDER_EVENT));
 }
 
 function findBook(bookId) {
+    const books = JSON.parse(localStorage.getItem(localStorageBook))
     for (const bookItem of books) {
         if (bookItem.id === bookId) {
             return bookItem;
@@ -154,10 +178,22 @@ function findBook(bookId) {
 }
 
 function removeBook(bookId) {
+    const books = JSON.parse(localStorage.getItem(localStorageBook))
     const bookTarget = findBook(bookId);
 
     if (bookTarget == null) return;
 
     books.splice(bookTarget, 1);
+    localStorage.setItem(localStorageBook, JSON.stringify(books))
     document.dispatchEvent(new Event(RENDER_EVENT));
+    return books
 }
+
+function updateDataBook(book){
+    const books = JSON.parse(localStorage.getItem(localStorageBook))
+    const bookTarget = findBook(book.id);
+    books.splice(bookTarget, 1);
+    books.push(book)
+    localStorage.setItem(localStorageBook, JSON.stringify(books))
+}
+
