@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         const searchSubmit = document.getElementById('searchSubmit');
-        searchSubmit.addEventListener('submit', function (event) {
+        searchSubmit.addEventListener('click', function (event) {
             event.preventDefault();
             queryCari = document.getElementById('searchBookTitle').value
             document.dispatchEvent(new Event(RENDER_EVENT));
